@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    <title>ระบบเลือกตั้งออนไลน์</title>
+   
+
+</head>
+<body>
+    <!-- Top Navigation for Desktop -->
+    <nav id="topNav" class="top-nav navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">ระบบเลือกตั้งออนไลน์</a>
+            <div class="navbar-nav ms-auto">
+            
+                <a class="nav-link" href="report.html">
+                    <i class="fas fa-chart-bar"></i> รายงาน
+                </a>
+                  <a class="nav-link active" href="index.html">
+                    <i class="fas fa-file-alt"></i> แบบฟอร์ม
+                </a>
+            </div>
+        </div>
+    </nav>
+    <!-- หน้าล็อกอิน -->
+    <div id="loginSection" class="login-container">
+        <nav class="bottom-nav">
+            <div class="nav-items">
+                <a href="index.html" class="active">
+                    <i class="fas fa-file-alt"></i>
+                    <span>แบบฟอร์ม</span>
+                </a>
+                <a href="report.html" class="active">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>รายงาน</span>
+                </a>
+            </div>
+        </nav>
+        <div class="login-header">
+            <center>
+               <h6 class="login-title">ระบบเลือกตั้งคณะกรรมการสวัสดิการในสถานประกอบกิจการ</h6>
+                <div class="login-description">
+                    บริษัท เชียงใหม่โฟรเซ่นฟูดส์ จำกัด(มหาชน) Cm2
+                </div>
+            </center>
+        </div>
+        <div class="question-container">
+            <div class="question-title">กรอกรหัสพนักงาน<span class="required-star">*</span></div>
+            <input type="tel" class="login-input" id="loginEmployeeId" placeholder="รหัสพนักงาน" pattern="[0-9]*" inputmode="numeric">
+            <div id="loginError" class="error-message"></div>
+            <button type="button" id="checkEmployeeBtn" class="submit-button" style="margin-top: 20px;">ตรวจสอบรหัสพนักงาน</button>
+        </div>
+        <div class="footer">
+            <h6 class="text-lg font-semibold" style="font-size: 12px;color:#64748b;">
+                <i class="far fa-copyright"></i> 2025 พัฒนาโดย นายภาคภูมิ เรือนมูล แผนก HR<br> ร่วมกับ แผนกไอที และ คณะสวัสดิการโรงงานCm2<br> Cr.DeepSeek,Grok,ChatGpt
+            </h6>
+        </div>
+    </div>
+    <!-- หน้ารายชื่อผู้สมัครและลงคะแนน -->
+    <div id="formSection" class="form-container">
+        <div class="form-header">
+            <center>
+               <h6 class="form-title">ระบบเลือกตั้งคณะกรรมการสวัสดิการในสถานประกอบกิจการ</h6>
+                <div class="form-description">
+                    บริษัท เชียงใหม่โฟรเซ่นฟูดส์ จำกัด(มหาชน) Cm2
+                </div>
+                <div class="welcome-message" id="welcomeMessage"></div>
+            </center>
+        </div>
+        <form id="electionForm">
+            <div class="question-container">
+                <div class="question-title">1.กรุณาเลือกผู้สมัครที่ต้องการ (<b style="color: red;" >เลือกได้ 1 คนเท่านั้น</b>)<span class="required-star">*</span></div>
+                <div id="candidatesContainer" class="candidates-container"></div>
+                <div id="voteConfirm" class="vote-confirm" style="display: none;">
+                    <div class="selected-candidate">
+                        <img id="selectedCandidateImage" src="" alt="ผู้สมัคร">
+                        <br>
+                        <div class="selected-info">
+                            <div id="selectedCandidateName" class="candidate-name"></div>
+                            <div id="selectedCandidateParty" class="candidate-party"></div>
+                            <div>หมายเลข <span id="selectedCandidateNumber" style="font-weight: bold;"></span></div>
+                        </div>
+                    </div>
+                   <center>
+                       <div class="question-title">ยืนยันการเลือกผู้สมัครนี้หรือไม่?</div>
+                       <button type="button" id="changeSelection" class="submit-button" style="background: linear-gradient(135deg, #64748b 0%, #475569 100%); margin-right: 10px;">เปลี่ยนการเลือก</button>
+                       <button type="button" id="confirmVote" class="submit-button" style="background: var(--gradient-success);">ยืนยันการเลือก</button>
+                   </center>
+                </div>
+            </div>
+            <div class="question-container">
+    <div class="question-title">2.ยินยอมให้ใช้ข้อมูล<span class="required-star">*</span></div>
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="consentCheckbox" required>
+        <label class="form-check-label" for="consentCheckbox">
+            ข้าพเจ้ายินยอมให้บริษัทใช้ข้อมูลการเลือกตั้งนี้เพื่อวัตถุประสงค์ในการบริหารงานเท่านั้น และยินยอมให้บันทึกที่อยู่ IP เพื่อตรวจสอบความปลอดภัย (ตาม PDPA)
+        </label>
+    </div>
+</div>
+            <input type="hidden" id="selectedCandidateId" name="selectedCandidateId" value="">
+        </form>
+        <div class="question-title" style="font-size: 14px;"><span class="required-star me-2">*</span>เป็นคำถามที่ต้องระบุ</div>
+        <br><br><br><hr><br>
+        <center>
+            <div class="footer">
+                <h6 class="text-lg font-semibold" style="font-size: 12px;color:#64748b;">
+                    <i class="far fa-copyright"></i> 2025 พัฒนาโดย นายภาคภูมิ เรือนมูล แผนก HR<br> ร่วมกับ แผนกไอที และ คณะสวัสดิการโรงงานCm2<br> Cr.DeepSeek,Grok,ChatGpt
+                </h6>
+            </div>
+        </center>
+    </div>
+    <!-- หน้าขอบคุณหลังลงคะแนน -->
+    <div id="thankYouSection" class="form-container" style="display: none;">
+        <div class="form-header">
+            <center>
+               <h4 class="form-title" style="background: var(--gradient-success); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: transparent;">ขอบคุณที่มาใช้สิทธิ์เลือกตั้ง</h4>
+                <div class="form-description">
+                    บริษัท เชียงใหม่โฟรเซ่นฟูดส์ จำกัด(มหาชน) Cm2
+                </div>
+            </center>
+        </div>
+        <div style="text-align: center; padding: 40px 0;">
+            <p style="font-size: 18px; margin-bottom: 30px; font-weight: 600; color: var(--dark-color);">ขอบคุณสำหรับการมีส่วนร่วมในการเลือกตั้งครั้งนี้<br>สิทธิ์ของคุณได้รับการบันทึกเรียบร้อยแล้ว</p>
+            <button onclick="window.location.href='index.html'" class="submit-button" style="margin-right: 10px; background: var(--gradient-primary);">
+                <i class="fas fa-home"></i> กลับไปหน้าหลัก
+            </button>
+            <button onclick="window.location.href='report.html'" class="submit-button" style="background: var(--gradient-success);">
+                <i class="fas fa-chart-bar"></i> ดูรายงานการเลือกตั้ง
+            </button>
+        </div>
+        <div class="footer">
+            <h6 class="text-lg font-semibold" style="font-size: 12px;color:#64748b;">
+                <i class="far fa-copyright"></i> 2025 พัฒนาโดย นายภาคภูมิ เรือนมูล แผนก HR<br> ร่วมกับ แผนกไอที และ คณะสวัสดิการโรงงานCm2<br> Cr.DeepSeek,Grok,ChatGpt
+            </h6>
+        </div>
+    </div>
+
+
+    <script type="module" src="index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
