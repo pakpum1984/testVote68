@@ -18,6 +18,7 @@ import {
     getAuth,
     signInAnonymously
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
+
 // Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyCWRIFj6NHeHkXL1bIEbb93lUzaZf8NNmI",
@@ -28,19 +29,23 @@ const firebaseConfig = {
     appId: "1:32150734884:web:58b01e9f4ba0d9b9a170b1",
     measurementId: "G-K97E7L101D"
 };
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 const functions = getFunctions(app);
+
 // ตั้งค่า emulator สำหรับการพัฒนา
 // if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-//     connectFunctionsEmulator(functions, "localhost", 5001);
+// 	connectFunctionsEmulator(functions, "localhost", 5001);
 // }
+
 // ตัวแปรเก็บข้อมูลพนักงานปัจจุบัน
 let currentEmployee = null;
 let candidates = [];
 let selectedCandidate = null;
+
 // ฟังก์ชันล็อกอินแบบ Anonymous
 async function initializeAuth() {
     try {
@@ -51,6 +56,7 @@ async function initializeAuth() {
         showError('เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อระบบได้');
     }
 }
+
 // ฟังก์ชันบันทึก Audit Log (ใช้ Cloud Functions)
 async function logAction(action, details = null) {
     try {
@@ -64,6 +70,7 @@ async function logAction(action, details = null) {
         console.error('Error logging action:', error);
     }
 }
+
 // ฟังก์ชันสร้าง Vote Hash
 function generateVoteHash(employeeId, candidateId) {
     const timestamp = new Date().getTime();
@@ -76,6 +83,7 @@ function generateVoteHash(employeeId, candidateId) {
     }
     return Math.abs(hash).toString(16);
 }
+
 // ฟังก์ชัน Track Page View (ใหม่: สำหรับบันทึกการเข้าชม)
 async function trackPageView(page, employeeId = null) {
     try {
@@ -86,12 +94,13 @@ async function trackPageView(page, employeeId = null) {
         console.error('Error tracking page:', error);  // Non-critical, ไม่ block UI
     }
 }
+
 // ฟังก์ชันโหลดข้อมูลผู้สมัครจาก Firestore
 async function loadCandidatesFromFirestore() {
     try {
         const querySnapshot = await getDocs(collection(db, 'candidates'));
         candidates = [];
-      
+        
         querySnapshot.forEach((doc) => {
             const candidate = doc.data();
             candidate.id = doc.id;
@@ -99,7 +108,6 @@ async function loadCandidatesFromFirestore() {
         });
 
         // เรียงลำดับ: ผู้สมัครปกติตามหมายเลข (ascending) แล้วตามด้วย novote
-        // แก้ไข: ดึงตัวเลขจาก "เบอร์X" โดยลบ "เบอร์" ออก แล้ว parse เป็น integer
         candidates.sort((a, b) => {
             if (a.number === 'novote') return 1;
             if (b.number === 'novote') return -1;
@@ -115,7 +123,7 @@ async function loadCandidatesFromFirestore() {
             
             return aNum - bNum;
         });
-      
+        
         if (candidates.length > 0) {
             console.log('Candidates loaded from Firestore:', candidates.length + ' candidates');
             return true;
@@ -130,6 +138,7 @@ async function loadCandidatesFromFirestore() {
         return false;
     }
 }
+
 // ฟังก์ชันแสดง SweetAlert Error
 function showError(title, message) {
     Swal.fire({
@@ -141,6 +150,7 @@ function showError(title, message) {
         allowOutsideClick: false
     });
 }
+
 // ฟังก์ชันแสดง SweetAlert Success
 function showSuccess(title, message) {
     Swal.fire({
@@ -152,6 +162,7 @@ function showSuccess(title, message) {
         timer: 2000
     });
 }
+
 // ฟังก์ชันแสดง Loading
 function showLoading(title) {
     Swal.fire({
@@ -164,6 +175,7 @@ function showLoading(title) {
         }
     });
 }
+
 document.addEventListener('DOMContentLoaded', async function() {
     // เริ่มต้นระบบ Authentication
     await initializeAuth();
@@ -175,6 +187,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (!candidatesLoaded) {
         return;
     }
+
     // ตั้งค่าปุ่มตรวจสอบรหัสพนักงาน
     const employeeIdInput = document.getElementById('loginEmployeeId');
     const loginError = document.getElementById('loginError');
@@ -187,10 +200,12 @@ document.addEventListener('DOMContentLoaded', async function() {
             checkEmployeeLogin();
         }
     });
+
     // ตั้งค่าฟอร์มเลือกตั้ง
     document.getElementById('electionForm').addEventListener('submit', function(e) {
         e.preventDefault();
     });
+
     // ปุ่มเปลี่ยนการเลือก
     document.getElementById('changeSelection').addEventListener('click', function() {
         document.getElementById('voteConfirm').style.display = 'none';
@@ -207,10 +222,13 @@ document.addEventListener('DOMContentLoaded', async function() {
         selectedCandidate = null;
         document.getElementById('selectedCandidateId').value = '';
     });
+
     // ปุ่มยืนยันการเลือก
     document.getElementById('confirmVote').addEventListener('click', submitVoteFirestore);
+
     // แสดงรายชื่อผู้สมัคร
     renderCandidates();
+
     // Bottom Navigation
     const links = document.querySelectorAll('.bottom-nav a');
     links.forEach(link => {
@@ -219,6 +237,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             this.classList.add('active');
         });
     });
+
     // Top Navigation (Desktop)
     const topLinks = document.querySelectorAll('.top-nav .nav-link');
     topLinks.forEach(link => {
@@ -227,11 +246,13 @@ document.addEventListener('DOMContentLoaded', async function() {
             this.classList.add('active');
         });
     });
+
     // ซ่อนหน้าเลือกตั้งและแสดงหน้า login เมื่อโหลดหน้าเว็บครั้งแรก
     document.getElementById('loginSection').style.display = 'block';
     document.getElementById('formSection').style.display = 'none';
     document.getElementById('thankYouSection').style.display = 'none';
 });
+
 // ฟังก์ชันแสดงรายชื่อผู้สมัคร
 function renderCandidates() {
     const container = document.getElementById('candidatesContainer');
@@ -254,13 +275,14 @@ function renderCandidates() {
             </div>
             <div class="candidate-info">
                 <div class="candidate-number">${candidate.number}</div>
-     
+    
                 <button class="select-candidate-btn" data-candidate-id="${candidate.id}">เลือกผู้สมัคร</button>
             </div>
         `;
         card.addEventListener('click', () => selectCandidate(candidate));
         container.appendChild(card);
     });
+
     // เพิ่ม event listener สำหรับปุ่มเลือกผู้สมัคร
     document.querySelectorAll('.select-candidate-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
@@ -305,14 +327,15 @@ function selectCandidate(candidate) {
     document.getElementById('selectedCandidateName').textContent = candidate.name;
     document.getElementById('selectedCandidateParty').textContent = candidate.party;
     document.getElementById('selectedCandidateNumber').textContent = candidate.number;
-   
+    
     // เพิ่มบรรทัดนี้: ติ๊ก checkbox อัตโนมัติหลังเลือกผู้สมัคร
     document.getElementById('consentCheckbox').checked = true;
-   
+    
     document.getElementById('voteConfirm').style.display = 'block';
     document.getElementById('voteConfirm').scrollIntoView({ behavior: 'smooth' });
 }
-// แก้ไขฟังก์ชัน checkEmployeeLogin
+
+// *** แก้ไขฟังก์ชัน checkEmployeeLogin เพื่อให้ลงคะแนนซ้ำได้ ***
 async function checkEmployeeLogin() {
     const employeeId = document.getElementById('loginEmployeeId').value.trim();
     const loginError = document.getElementById('loginError');
@@ -321,33 +344,33 @@ async function checkEmployeeLogin() {
         loginError.style.display = 'block';
         return;
     }
+    loginError.style.display = 'none'; // Clear error message
     try {
         showLoading('กำลังตรวจสอบ...');
-        // ตรวจสอบข้อมูลพนักงานและสถานะการลงคะแนน
-        const [employeeDoc, voteDoc] = await Promise.all([
-            getDoc(doc(db, 'employees', employeeId)),
-            getDoc(doc(db, 'electionResponses', employeeId))
-        ]);
+        
+        // **การแก้ไข:** ไม่มีการตรวจสอบ `electionResponses` (voteDoc) อีกต่อไป
+        const employeeDoc = await getDoc(doc(db, 'employees', employeeId));
+
         if (employeeDoc.exists()) {
             const employeeData = employeeDoc.data();
-          
-            if (voteDoc.exists()) {
-                showError('แจ้งเตือน', 'รหัสพนักงานนี้ได้ทำการลงคะแนนแล้ว');
-            } else {
-                currentEmployee = {
-                    id: employeeId,
-                    name: employeeData.name,
-                    department: employeeData.department
-                };
-                document.getElementById('welcomeMessage').textContent =
-                    `รหัสพนักงาน ${employeeId} ${currentEmployee.name} แผนก ${currentEmployee.department}`;
-                // ซ่อนหน้า login และแสดงหน้าเลือกตั้ง
-                document.getElementById('loginSection').style.display = 'none';
-                document.getElementById('formSection').style.display = 'block';
-                // Track การเข้าหน้าเลือกตั้ง
-                await trackPageView('form', employeeId);
-                Swal.close();
-            }
+            
+            // อนุญาตให้เข้าสู่หน้าลงคะแนนได้เลย แม้จะเคยลงคะแนนแล้ว
+            currentEmployee = {
+                id: employeeId,
+                name: employeeData.name,
+                department: employeeData.department
+            };
+            document.getElementById('welcomeMessage').textContent =
+                `รหัสพนักงาน ${employeeId} ${currentEmployee.name} แผนก ${currentEmployee.department}`;
+            
+            // ซ่อนหน้า login และแสดงหน้าเลือกตั้ง
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('formSection').style.display = 'block';
+            
+            // Track การเข้าหน้าเลือกตั้ง
+            await trackPageView('form', employeeId);
+            Swal.close();
+            
         } else {
             showError('ไม่พบข้อมูล', 'รหัสพนักงานที่กรอกไม่ถูกต้อง');
         }
@@ -356,6 +379,7 @@ async function checkEmployeeLogin() {
         showError('เกิดข้อผิดพลาด', 'ไม่สามารถตรวจสอบข้อมูลพนักงานได้');
     }
 }
+
 // ฟังก์ชันลงคะแนนแบบ Firestore (ปลอดภัยกว่า)
 async function submitVoteFirestore() {
     if (!validateForm()) return;
@@ -365,8 +389,8 @@ async function submitVoteFirestore() {
         html: `
             <div style="text-align: center;">
                 <img src="${selectedCandidate.image}" 
-                     alt="${selectedCandidate.name}" 
-                     style="width: 120px; height: 180px; border-radius: 8px; object-fit: cover; margin-bottom: 15px; border: 3px solid #4361ee;">
+                    alt="${selectedCandidate.name}" 
+                    style="width: 120px; height: 180px; border-radius: 8px; object-fit: cover; margin-bottom: 15px; border: 3px solid #4361ee;">
                 <h5>คุณต้องการลงคะแนนให้</h5>
                 <h4 style="color: #4361ee; margin: 10px 0;"><strong>${selectedCandidate.name}</strong></h4>
                 <h5>ใช่หรือไม่?</h5>
@@ -384,13 +408,15 @@ async function submitVoteFirestore() {
     
     try {
         showLoading('กำลังบันทึกข้อมูล...');
+        
         // Track การ submit vote
         await trackPageView('vote-submit', currentEmployee.id);
+        
         // วิธีที่ 1: ใช้ Firestore โดยตรง (เร็วที่สุด)
         await submitVoteDirect();
-      
+        
         showSuccess('ลงคะแนนสำเร็จ', 'ขอบคุณที่ใช้สิทธิ์เลือกตั้ง');
-      
+        
         // หลังจากแสดง success 2 วินาที แล้วแสดงหน้า thank you
         setTimeout(() => {
             document.getElementById('formSection').style.display = 'none';
@@ -399,34 +425,33 @@ async function submitVoteFirestore() {
         }, 2000);
     } catch (error) {
         console.error('Error submitting vote:', error);
-      
+        
         let errorMessage = 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองอีกครั้ง';
         if (error.message.includes('already-exists')) {
-            errorMessage = 'มีการลงคะแนนด้วยรหัสพนักงานนี้แล้ว';
+            errorMessage = 'มีการลงคะแนนด้วยรหัสพนักงานนี้แล้ว'; // ข้อความนี้จะไม่มีผลถ้าใช้โค้ดใหม่
         }
         showError('เกิดข้อผิดพลาด', errorMessage);
     }
 }
-// ฟังก์ชันลงคะแนนแบบ Firestore โดยตรง (เร็ว)
+
+// *** แก้ไขฟังก์ชัน submitVoteDirect เพื่อให้ลงคะแนนซ้ำได้โดยการสร้างเอกสารใหม่ทุกครั้ง ***
 async function submitVoteDirect() {
     const voteHash = generateVoteHash(currentEmployee.id, selectedCandidate.id);
 
     // ใช้ Transaction สำหรับความปลอดภัย
     await runTransaction(db, async (transaction) => {
-        // ตรวจสอบว่ายังไม่เคยลงคะแนน
-        const voteRef = doc(db, 'electionResponses', currentEmployee.id);
-        const voteDoc = await transaction.get(voteRef);
-      
-        if (voteDoc.exists()) {
-            throw new Error('มีการลงคะแนนด้วยรหัสพนักงานนี้แล้ว');
-        }
-        // ตรวจสอบว่าพนักงานมีอยู่ในระบบ
+        
+        // **การแก้ไข:** สร้าง Document Reference ใหม่ใน collection โดยให้ Firestore สร้าง ID อัตโนมัติ
+        const newVoteRef = doc(collection(db, 'electionResponses'));
+
+        // ตรวจสอบว่าพนักงานมีอยู่ในระบบ (ยังคงตรวจสอบเพื่อความถูกต้องของ employeeId)
         const employeeRef = doc(db, 'employees', currentEmployee.id);
         const employeeDoc = await transaction.get(employeeRef);
-      
+        
         if (!employeeDoc.exists()) {
             throw new Error('ข้อมูลพนักงานไม่พบในระบบ');
         }
+        
         // ข้อมูลสำหรับบันทึกการโหวต
         const voteData = {
             employeeId: currentEmployee.id,
@@ -441,8 +466,10 @@ async function submitVoteDirect() {
             voteHash: voteHash,
             serverTimestamp: serverTimestamp()
         };
-        // บันทึกการโหวต
-        transaction.set(voteRef, voteData);
+        
+        // บันทึกการโหวตลงในเอกสารใหม่ (อนุญาตให้ซ้ำ)
+        transaction.set(newVoteRef, voteData);
+        
         // อัพเดทคะแนนผู้สมัครเฉพาะกรณีที่ไม่ใช่ novote
         if (selectedCandidate.number !== 'novote') {
             const candidateRef = doc(db, 'candidates', selectedCandidate.id);
@@ -452,9 +479,11 @@ async function submitVoteDirect() {
             });
         }
     });
+
     // เรียก Cloud Functions สำหรับบันทึก audit log (แบบไม่รอผล)
     logAuditBackground(currentEmployee.id, selectedCandidate.id, voteHash);
 }
+
 // ฟังก์ชันบันทึก audit log แบบไม่รอผล (background)
 async function logAuditBackground(employeeId, candidateId, voteHash) {
     try {
@@ -472,6 +501,7 @@ async function logAuditBackground(employeeId, candidateId, voteHash) {
         console.log('Background audit log error (non-critical):', error);
     }
 }
+
 // ฟังก์ชันรีเซ็ตฟอร์ม
 function resetForm() {
     document.getElementById('electionForm').reset();
@@ -489,7 +519,16 @@ function resetForm() {
     selectedCandidate = null;
     currentEmployee = null;
     document.getElementById('welcomeMessage').textContent = '';
+    
+    // กลับไปหน้า Login เพื่อลงคะแนนซ้ำ (ถ้าต้องการ)
+    setTimeout(() => {
+        document.getElementById('thankYouSection').style.display = 'none';
+        document.getElementById('loginSection').style.display = 'block';
+        document.getElementById('loginEmployeeId').value = ''; // เคลียร์รหัสพนักงาน
+        document.getElementById('loginEmployeeId').focus();
+    }, 1000);
 }
+
 // ฟังก์ชันตรวจสอบความถูกต้องของฟอร์ม
 function validateForm() {
     if (!selectedCandidate) {
@@ -516,11 +555,13 @@ function validateForm() {
     }
     return true;
 }
+
 // ฟังก์ชันจัดการเมื่อออฟไลน์
 function setupOfflineHandler() {
     const onlineStatus = document.createElement('div');
     onlineStatus.className = 'status-indicator';
     document.body.appendChild(onlineStatus);
+
     function updateOnlineStatus() {
         if (navigator.onLine) {
             onlineStatus.textContent = 'ออนไลน์';
@@ -530,9 +571,11 @@ function setupOfflineHandler() {
             onlineStatus.className = 'status-indicator status-offline';
         }
     }
+
     window.addEventListener('online', updateOnlineStatus);
     window.addEventListener('offline', updateOnlineStatus);
     updateOnlineStatus();
 }
+
 // เริ่มต้นจัดการสถานะออนไลน์
 setupOfflineHandler();
